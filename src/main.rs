@@ -5,21 +5,28 @@ use axum::{
 
 use teloxide::prelude::*;
 
-#[tokio::main(flavor = "current_thread")]
+async fn get_coordinates() {
+    // Placeholder for future implementation
+}
+
+fn create_app() -> Router {
+    Router::new()
+        .route("/health", get(|| async {}))
+        .route("/coordinates", get(get_coordinates))
+}
+
+#[tokio::main]
 async fn main() {
 
     // create config struct
 
-    run_bot(token);
+    let app = create_app();
 
-    tracing_subscriber::fmt::init();
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.expect("failed to bind tcp listener");
 
-    let app = Router::new()
-        .route("/", get(root));
-
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     println!("Server running on http://0.0.0.0:3000");
-    axum::serve(listener, app).await.unwrap();
+
+    axum::serve(listener, app).await.expect("failed to start server");
 }
 
 async fn run_bot(token: String) {
@@ -31,8 +38,4 @@ async fn run_bot(token: String) {
         Ok(())
     })
     .await;
-}
-
-async fn root() -> &'static str {
-    "Hello, World!"
 }
